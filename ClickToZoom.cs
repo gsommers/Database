@@ -5,18 +5,17 @@ using UnityEngine.UI;
 
 public class ClickToZoom : MonoBehaviour {
 
-    private Vector3 centerPos;
-
     private void Start()
     {
         transform.localPosition = new Vector3(-10, 0, 0);
-        centerPos = transform.position;
+        // centerPos = transform.position;
     }
     public void OnClick() // test
     {
         Debug.Log("reached");
-        RectTransform rT = GetComponent<RectTransform>();
-        Vector3 center = rT.rect.center;
+        print("Is anything happening?");
+        // RectTransform rT = GetComponent<RectTransform>();
+        // Vector3 center = rT.rect.center;
         ////if the position is say 500 600,
         ////and I click at 600 700
         ////    then I want 600 700 to be moved to where 500 600 was,
@@ -25,10 +24,11 @@ public class ClickToZoom : MonoBehaviour {
         ////    so I'll move the transform DOWN by 100 100
         //Vector3 diff = transform.position - Input.mousePosition;
         //transform.position = centerPos + diff;
-        Debug.Log(transform.position + " local " + transform.localPosition + " mouse " + Input.mousePosition + " center " + center);
+        // Debug.Log(transform.position + " local " + transform.localPosition + " mouse " + Input.mousePosition + " center " + center);
 
         
     }
+
     // test
     //public void OnClick2()
     //{
@@ -37,4 +37,7 @@ public class ClickToZoom : MonoBehaviour {
     //    scroll.content = nextImage.GetComponent<RectTransform>();
     //    thisImage.SetActive(false);
     //}
+
+   
+
 }
