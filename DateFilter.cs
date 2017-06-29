@@ -91,10 +91,12 @@ public class DateFilter : MonoBehaviour {
                 break;
         }
     }
-    public void Test()
+    /* 
+     * public void Test()
     {
         Debug.Log("Working!");
     }
+    */
 
     private void SetErrorText(string message, string error)
     {
