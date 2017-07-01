@@ -7,6 +7,7 @@ public class ZoomClick : MonoBehaviour {
 
     private List<Dropdown.OptionData> options;
     private Dropdown countries;
+    private Button submit;
 
     private GameObject zoomView;
     private Vector3 position;
@@ -16,24 +17,48 @@ public class ZoomClick : MonoBehaviour {
     private RectTransform simpleMap;
     private Button simpleButton;
     private Animator simpleSize;
-
-    public string countryName;
+    private string countryName;
 
     private void Start()
     {
-        zoomView = GameObject.FindWithTag("Zoom");
-        simple = GameObject.FindWithTag("Map");
-        simpleMap = simple.GetComponent<RectTransform>();
-        country = GameObject.FindWithTag("Country").GetComponent<Image>();
+        countries = GameObject.Find("Select").GetComponent<Dropdown>();
+        options = countries.options;
+        submit = GameObject.Find("Submit").GetComponent<Button>();
+
+        zoomView = GameObject.Find("Zoom View");     
         position = new Vector3(-330, 200, 0);
+        country = GameObject.Find("Country").GetComponent<Image>();
+
+        simple = GameObject.Find("Simple");
         simpleButton = simple.GetComponent<Button>();
         simpleSize = simple.GetComponent<Animator>();
-        countries = GameObject.FindWithTag("Dropdown").GetComponent<Dropdown>();
-        options = countries.options;
+        simpleMap = simple.GetComponent<RectTransform>();
     }
 
+    void OnMouseEnter()
+    {
+        if (!simpleButton.enabled)
+        Switch(true);
+    }
+
+    private void OnMouseExit()
+    {
+        Switch(false);
+    }
+
+    void Switch(bool toggle)
+    {
+        GameObject gO = GameObject.Find(transform.parent.name);
+        Renderer[] rends = gO.GetComponentsInChildren<Renderer>();
+        for (int i = 0; i < rends.Length; i++)
+        {
+            rends[i].enabled = toggle;
+        }
+    }
     public void ChooseCountry()
     {
+        TextAsset readMe = LoadingExample.GetBundle().LoadAsset<TextAsset>("Test");
+        print(readMe.text);
         simpleMap.localPosition = position;
         zoomView.GetComponent<Image>().color = Color.white;
         country.sprite = ((GameObject)Resources.Load(countryName)).GetComponent<Image>().sprite;
@@ -54,17 +79,24 @@ public class ZoomClick : MonoBehaviour {
             rect.sizeDelta = new Vector2(rect.sizeDelta.x * 750 / rect.sizeDelta.y, 750);
     }
 
-    public void SetCountry()
+    public void SelectDropdown(int val)
     {
-        if (countries.value > 0)
-        {
-            countryName = options[countries.value].text;
-            ChooseCountry();
-        }
+        if (val > 0)
+            submit.interactable = true;
+        else
+            submit.interactable = false;
+
     }
 
-    void OnMouseUpAsButton()
+    public void SetCountry()
     {
+        countryName = options[countries.value].text;
+        ChooseCountry();
+    }
+
+    public void Hit(string name)
+    {
+        countryName = name;
         if (Input.mousePosition.y > 100 && !simpleButton.enabled && countries.GetComponentInChildren<ScrollRect>() == null)
         {
             ChooseCountry();
