@@ -3,39 +3,47 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
+using TMPro;
 
+/*
+ * Implementation of the Date data type, which is comparable
+ */
 public class Date: IComparable<Date>
 {
     private int year;
-    private bool era; // false for BC, true for AD
+    private bool era; // false for BCE, true for CE
 
+    // Instantiate a date from a year (string) and era (bool)
     public Date(string date, bool annoDom)
     {
-        // check that it's a number
-        year = Convert.ToInt32(date);
+        Int32.TryParse(date, out year); // only integers accepted
         era = annoDom;
     }
 
+    // Instantiate a date from a string that includes year and era
     public Date(string date)
     {
-        // assuming it will be valid, since I'm typing it
-        int space = date.IndexOf(" ");
-        year = Convert.ToInt32(date.Substring(0, space));
-        era = (date.Substring(space + 1) == "AD");
+        int space = date.IndexOf(" "); // should be positive
+        if (space < 0) // should never occur, since I'm inputting it
+            throw new FormatException("Problem with the date...");
+        Int32.TryParse(date.Substring(0, space), out year);
+        era = (date.Substring(space + 1) == "CE");
     }
 
+    // set BCE (false) or CE (true)
     public void SetEra(bool toggle)
     {
         era = toggle;
     }
 
+    // Implements the IComparable interface by comparing two dates
+    // A later date is considered "greater" than an earlier one
     public int CompareTo(Date other)
     {
         if (era == other.era) 
         {
             if (era) // both AD
             {
-                Debug.Log("both AD");
                 return year - other.year;         
             }
             else // both BC
@@ -48,20 +56,22 @@ public class Date: IComparable<Date>
     }
 }
 
+// Handles input on the date panel
 public class DateFilter : MonoBehaviour {
 
-    private Date start, end;
-    public Text startText, endText, errorText;
-    private Color originalColor;
-    public string earliest, latest;
-    public Color errorColor;
-    public Toggle startAD, endAD;
+    private Date start, end; // only data between start and end will be shown
+    public TextMeshProUGUI startText, endText, errorText;
+    private Color originalColor; // of the start and end text
+    public string earliest, latest; // time span of this database
+    public Color errorColor; // probably red
+    public Toggle startAD, endAD; // radio buttons for era
 
     private void Start()
     {
-        originalColor = startText.color;
+        originalColor = startText.color; // store the normal color of start and end text
     }
 
+    // called when user finishes typing in the text box for start date
     public void SetStart(string entry)
     {
         if (entry.Length > 0)
@@ -70,7 +80,7 @@ public class DateFilter : MonoBehaviour {
             start = null;
     }
 
-
+    // called when user finishes typing in the text box for end date
     public void SetEnd(string entry)
     {
         if (entry.Length > 0)
@@ -79,6 +89,7 @@ public class DateFilter : MonoBehaviour {
             end = null;
     }
 
+    // called when user toggles radio button for BCE/CE
     public void ChangeEra(string type)
     {
         switch(type)
@@ -91,33 +102,34 @@ public class DateFilter : MonoBehaviour {
                 break;
         }
     }
-    /* 
-     * public void Test()
-    {
-        Debug.Log("Working!");
-    }
-    */
 
+    // sets/clears error message for invalid input
     private void SetErrorText(string message, string error)
     {
         errorText.text = message;
         switch (error)
         {
-            case "start": errorText.alignment = TextAnchor.MiddleLeft;
+            // error in start input
+            case "start": errorText.alignment = TextAlignmentOptions.MidlineLeft;
                 startText.color = errorColor;
                 break;
-            case "end": errorText.alignment = TextAnchor.MiddleRight;
+            // error in end input
+            case "end": errorText.alignment = TextAlignmentOptions.MidlineRight;
                 endText.color = errorColor;
                 break;
-            case "both": errorText.alignment = TextAnchor.MiddleCenter;
+            // start date later than end date
+            case "both": errorText.alignment = TextAlignmentOptions.Midline;
                 endText.color = errorColor;
                 startText.color = errorColor;
                 break;
+           // no error
             case "neither": endText.color = originalColor;
                 startText.color = originalColor;
                 break;
         }
     }
+
+    // called when user presses submit button; checks for invalid input
     public void Submit()
     {
         // assuming all is correct
@@ -133,12 +145,14 @@ public class DateFilter : MonoBehaviour {
             CheckLimits(end, "end");
         }
 
+        // start date before end date
         if (start != null && end != null && start.CompareTo(end) > 0)
         {
             SetErrorText("Please select a start date that is earlier than the end date.", "both");
         }
     }
 
+    // check that input is within the time span of this database
     private void CheckLimits(Date entry, string type)
     {
         if (entry.CompareTo(new Date(earliest)) < 0 || entry.CompareTo(new Date(latest)) > 0)
