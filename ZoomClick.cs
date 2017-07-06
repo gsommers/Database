@@ -9,8 +9,19 @@ using TMPro;
 public class ZoomClick : MonoBehaviour {
 
     // determines whether a user is clicking on a country, or a button above it
-    private const float MIN_CLICK = 100; // height of date panel
-    private const float MIN_CLICK_PLUS = 154; // height of date panel plus source panel
+    private float minClick; // height of date panel
+    private float minClickPlus; // height of date panel plus source panel
+    private float clickPos;
+    private float offset;
+
+    private float ClickPos
+    {
+        get
+        {
+            return Camera.main.ScreenToWorldPoint(Input.mousePosition).y + offset;
+        }
+    }
+
     // references related to the country/region dropdown
     private List<Dropdown.OptionData> options;
     private Dropdown countries;
@@ -57,40 +68,17 @@ public class ZoomClick : MonoBehaviour {
         simpleButton = simple.GetComponent<Button>();
         simpleSize = simple.GetComponent<Animator>();
         simpleMap = simple.GetComponent<RectTransform>();
+
+        // where you can click
+        minClick = GameObject.Find("Dates Panel").GetComponent<RectTransform>().rect.height;
+        minClickPlus = minClick + panel.GetComponent<RectTransform>().rect.height;
+        offset = GameObject.Find("Canvas").GetComponent<RectTransform>().rect.height / 2;
     }
 
     // hide the source information
     private void Start()
     {
         panel.SetActive(false);
-    }
-
-    // highlights a clickable country when mouse is over it
-    void OnMouseEnter()
-    {
-        if (!simpleButton.enabled) // we're on the empire map
-        {
-            Switch(true);
-        }
-    }
-
-    // hides a clickable country when mouse is no longer over it
-    private void OnMouseExit()
-    {
-        Switch(false);
-    }
-
-    void Switch(bool toggle)
-    {
-        // game object for the entire region/country
-        GameObject gO = transform.parent.gameObject; 
-
-        // the game object's children all have mesh renderers attached
-        Renderer[] rends = gO.GetComponentsInChildren<Renderer>();
-        for (int i = 0; i < rends.Length; i++)
-        {
-            rends[i].enabled = toggle;
-        }
     }
 
     // zoom to the selected country/region
@@ -156,11 +144,13 @@ public class ZoomClick : MonoBehaviour {
     // called when the user clicks on a country
     public void Hit(string name)
     {
-        float min = MIN_CLICK; // assuming source panel is closed
+        float min = minClick; // assuming source panel is closed
         if (panel.activeInHierarchy)
-            min = MIN_CLICK_PLUS;
-        countryName = name;
-        if (Input.mousePosition.y > min && !simpleButton.enabled && countries.GetComponentInChildren<ScrollRect>() == null)
+        {
+            min = minClickPlus;
+        }
+        countryName = name;;
+        if (ClickPos > min && !simpleButton.enabled && countries.GetComponentInChildren<ScrollRect>() == null)
         {
             ChooseCountry();
         }

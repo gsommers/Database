@@ -10,11 +10,11 @@ namespace TMPro.Examples
 {
     public class LinkHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerUpHandler
     {
-        public RectTransform TextPopup_Prefab_01;
+        public RectTransform TextPopup_Prefab_01; // link popup box
 
         private RectTransform m_TextPopup_RectTransform;
         private TextMeshProUGUI m_TextPopup_TMPComponent;
-        private const string k_WordText = "Word Index: <#ffff00>";
+        // private const string k_WordText = "Word Index: <#ffff00>";
 
 
         private TextMeshProUGUI m_TextMeshPro;
@@ -23,13 +23,13 @@ namespace TMPro.Examples
 
         // Flags
         private bool isHoveringObject;
-        private int m_selectedWord = -1;
+        // private int m_selectedWord = -1;
         private int m_selectedLink = -1;
-        private int m_lastIndex = -1;
+        // private int m_lastIndex = -1;
 
-        private Matrix4x4 m_matrix;
+        // private Matrix4x4 m_matrix;
 
-        private TMP_MeshInfo[] m_cachedMeshInfoVertexData;
+        // private TMP_MeshInfo[] m_cachedMeshInfoVertexData;
 
         void Awake()
         {
@@ -56,6 +56,7 @@ namespace TMPro.Examples
             m_TextPopup_RectTransform.gameObject.SetActive(false);
         }
 
+        /*
         void OnEnable()
         {
             // Subscribe to event fired when text object has been regenerated.
@@ -68,7 +69,6 @@ namespace TMPro.Examples
             TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(ON_TEXT_CHANGED);
         }
 
-
         void ON_TEXT_CHANGED(Object obj)
         {
             if (obj == m_TextMeshPro)
@@ -77,6 +77,7 @@ namespace TMPro.Examples
                 m_cachedMeshInfoVertexData = m_TextMeshPro.textInfo.CopyMeshInfoVertexData();
             }
         }
+        */
 
         void LateUpdate()
         {
@@ -241,7 +242,7 @@ namespace TMPro.Examples
                 */
                 #endregion
                 
-                #region Example of Link Handling
+                #region Link Handling
                 // Check if mouse intersects with any links.
                 int linkIndex = TMP_TextUtilities.FindIntersectingLink(m_TextMeshPro, Input.mousePosition, m_Camera);
 
@@ -264,31 +265,27 @@ namespace TMPro.Examples
                     Vector3 worldPointInRectangle = Vector3.zero;
                     RectTransformUtility.ScreenPointToWorldPointInRectangle(m_TextMeshPro.rectTransform, Input.mousePosition, m_Camera, out worldPointInRectangle);
 
-                    switch (linkInfo.GetLinkID())
+                    m_TextPopup_RectTransform.gameObject.SetActive(true);
+                    string linkName = linkInfo.GetLinkID();
+                    if (linkName.Equals("id_source")) // hyperlink
                     {
-                        case "id_source":
-                            m_TextPopup_RectTransform.position = worldPointInRectangle;
-                            m_TextPopup_RectTransform.gameObject.SetActive(true);
-                            m_TextPopup_TMPComponent.text = "Click to follow link";
-                            break;
-                        case "id_end":
-                            m_TextPopup_RectTransform.localPosition = worldPointInRectangle - new Vector3(0, 40, 0);
-                            m_TextPopup_RectTransform.gameObject.SetActive(true);
-                            m_TextPopup_TMPComponent.text = "The latest date you want to filter";
-                            Invoke("DisableLink", 1);
-                            break;
-                        case "id_start":
-                            m_TextPopup_RectTransform.localPosition = worldPointInRectangle - new Vector3(0, 40, 0);
-                            m_TextPopup_RectTransform.gameObject.SetActive(true);
-                            m_TextPopup_TMPComponent.text = "The earliest date you want to filter";
-                            Invoke("DisableLink", 1);
-                            break;
+                        m_TextPopup_RectTransform.position = worldPointInRectangle;
+                        m_TextPopup_TMPComponent.text = "Click to follow link";
                     }
+                    else
+                    {
+                        m_TextPopup_RectTransform.localPosition = worldPointInRectangle - new Vector3(0, 40, 0);
+                        if (linkName.Equals("id_end"))
+                            m_TextPopup_TMPComponent.text = "The latest date you want to filter";
+                        else // id_start
+                            m_TextPopup_TMPComponent.text = "The earliest date you want to filter";
+                    }
+                    Invoke("DisableLink", 1);
                 }
                 #endregion
 
             }
-            else
+            /* else
             {
                 // Restore any character that may have been modified
                 if (m_lastIndex != -1)
@@ -297,12 +294,9 @@ namespace TMPro.Examples
                     m_lastIndex = -1;
                 }
             }
+            */
 
         }
-
-
-
-
 
         public void OnPointerEnter(PointerEventData eventData)
         {
@@ -323,6 +317,7 @@ namespace TMPro.Examples
             //Debug.Log("Click at POS: " + eventData.position + "  World POS: " + eventData.worldPosition);
 
             // Check if Mouse Intersects any of the characters. If so, assign a random color.
+            // I'm not using this
             #region Character Selection Handling
             /*
             int charIndex = TMP_TextUtilities.FindIntersectingCharacter(m_TextMeshPro, Input.mousePosition, m_Camera, true);
@@ -346,7 +341,7 @@ namespace TMPro.Examples
             */
             #endregion
 
-
+            // Not using this
             #region Word Selection Handling
             //Check if Mouse intersects any words and if so assign a random color to that word.
             /*
@@ -414,17 +409,9 @@ namespace TMPro.Examples
             if (linkIndex != -1)
             {
                 TMP_LinkInfo linkInfo = m_TextMeshPro.textInfo.linkInfo[linkIndex];
-                string linkName = linkInfo.GetLinkID();
-
-                //Debug.Log(TMP_TextUtilities.GetSimpleHashCode("id_02"));
-                switch (linkName)
-                {
-                    case "id_source":
+                if (linkInfo.GetLinkID() == "id_source") // hyperlink
                         Application.OpenURL(linkInfo.GetLinkText());
-                        break;
-                }
             }
-            
             #endregion
         }
 
@@ -435,6 +422,7 @@ namespace TMPro.Examples
         }
 
         // restores modified characters
+        /*
         void RestoreCachedVertexAttributes(int index)
         {
             if (index == -1 || index > m_TextMeshPro.textInfo.characterCount - 1) return;
@@ -525,5 +513,6 @@ namespace TMPro.Examples
             // Need to update the appropriate 
             m_TextMeshPro.UpdateVertexData(TMP_VertexDataUpdateFlags.All);
         }
+        */
     }
 }

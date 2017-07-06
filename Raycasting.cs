@@ -18,6 +18,8 @@ public class Raycasting : MonoBehaviour {
             foreach (RaycastHit hit in hits) // should be only one
             {
                 string name = hit.transform.parent.name;
+                Renderer rend = GameObject.Find(name).GetComponentInChildren<Renderer>();
+                if (rend.enabled)
                 clickable.Hit(name); // method in ZoomClick script
             }
         }
